@@ -1,0 +1,113 @@
+.App {
+  width: 100%;
+  max-width: 420px;
+  padding: 2rem;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.Card {
+  width: 400px;
+  min-height: 420px; /* “square-ish” feel */
+  padding: 1.5rem;
+  border-radius: 16px;
+
+  color: rgba(255, 255, 255, 0.92);
+  /* Outer frosted/blurred square */
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.55);
+}
+
+.AuthTitle {
+  margin: 0 0 1rem 0;
+  font-size: 1.4rem;
+  font-weight: 800;
+}
+
+/* Inner solid "bubble" */
+.AuthBubble {
+  border-radius: 16px;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.Form {
+  display: grid;
+  gap: 0.9rem;
+  margin-top: 1rem;
+}
+
+.Label {
+  display: grid;
+  gap: 0.35rem;
+  font-weight: 600;
+  width: 100%;
+}
+
+.Input {
+  padding: 0.7rem 0.8rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.08);
+  color: white;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.Input:focus {
+  outline: 2px solid rgba(255, 255, 255, 0.35);
+  outline-offset: 2px;
+}
+
+.AuthTabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+  margin-top: 0.25rem;
+}
+
+.Tab {
+  text-align: center;
+  padding: 0.65rem 0.8rem;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: white;
+  cursor: pointer;
+}
+
+.Tab.active {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.Button {
+  padding: 0.7rem 0.9rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.14);
+  color: rgba(255, 255, 255, 0.95);
+  font-weight: 800;
+  cursor: pointer;
+  width: 100%;
+}
+
+.Button.Secondary {
+  background: transparent;
+  width: auto;
+}
+
+.Error {
+  margin: 0;
+  color: #ff6b6b;
+  font-weight: 600;
+}
