@@ -24,11 +24,10 @@ a:hover {
 
 body {
   margin: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
   min-width: 320px;
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
   background:
     radial-gradient(1200px 600px at 20% 10%, rgba(255, 255, 255, 0.14), transparent 60%),
     radial-gradient(900px 500px at 80% 30%, rgba(255, 255, 255, 0.10), transparent 55%),
@@ -36,13 +35,10 @@ body {
     #0b0f17;
 }
 
-/* Ensure the React root itself centers content */
 #root {
   width: 100%;
   min-height: 100vh;
   display: flex;
-  justify-content: center;
-  align-items: center;
 }
 
 h1 {

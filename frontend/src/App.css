@@ -111,3 +111,305 @@
   color: #ff6b6b;
   font-weight: 600;
 }
+
+/* Logged-in shell layout */
+.AppLoggedIn {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  align-items: stretch;
+  text-align: left;
+  min-height: 100vh;
+}
+
+.AppHeaderRight {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.ProfileButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(0, 0, 0, 0.7);
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+}
+
+.ProfileAvatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.05));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: rgba(0, 0, 0, 0.85);
+}
+
+.AppBody {
+  /* no-op for logged-in chat layout now */
+}
+
+.SidebarHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.SidebarTitle {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.IconButton {
+  border-radius: 999px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.9);
+  padding: 0;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.SidebarContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  padding: 0.75rem 0;
+  overflow-y: auto;
+  font-size: 0.9rem;
+}
+
+.SidebarEmpty {
+  margin: 0;
+  opacity: 0.85;
+}
+
+.MainPanel {
+  /* unused with new chat layout */
+}
+
+.MainCard {
+  /* unused with new chat layout */
+}
+
+.ChatLayout {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  transition: margin-left 0.2s ease;
+}
+
+.ChatLayout--sidebarOpen {
+  margin-left: min(336px, 85vw);
+  width: calc(100vw - min(336px, 85vw));
+  min-width: 0;
+  max-width: calc(100vw - min(336px, 85vw));
+}
+
+.ChatHeader {
+  min-height: 56px;
+  flex-shrink: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(3, 5, 10, 0.96);
+  backdrop-filter: blur(10px);
+}
+
+.ChatHeaderSpacer {
+  flex: 1;
+}
+
+.ChatMain {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.ChatMessages {
+  flex: 1;
+  padding: 1rem 1.25rem;
+  overflow-y: auto;
+}
+
+.ChatPlaceholder {
+  margin: 0;
+  opacity: 0.6;
+  font-size: 0.95rem;
+}
+
+.ChatInputBar {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(8, 12, 20, 0.96);
+}
+
+.ChatInput {
+  flex: 1;
+  min-width: 0;
+  padding: 0.6rem 0.8rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(3, 5, 10, 0.9);
+  color: white;
+}
+
+.ChatSendButton {
+  flex-shrink: 0;
+  width: auto;
+  padding-inline: 1rem;
+}
+
+.IconButtonGhost {
+  flex-shrink: 0;
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+.SidebarOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  max-width: 320px;
+  width: 80%;
+  background: rgba(5, 8, 15, 0.98);
+  border-right: 1px solid rgba(255, 255, 255, 0.12);
+  display: flex;
+  flex-direction: column;
+  padding: 0.9rem 0.9rem 1rem;
+}
+
+.ChatListEmpty {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.75rem;
+}
+
+.ChatListWrapper {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  align-items: stretch;
+}
+
+.ChatList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.ChatListItem {
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.ChatListItem--active {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.ChatListItemButton {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.5rem 0.55rem;
+  background: transparent;
+  border-radius: 10px;
+  border: none;
+  text-align: left;
+}
+
+.ChatListItemAvatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.ChatListItemName {
+  font-size: 0.9rem;
+}
+
+.NewChatButton {
+  width: 100%;
+}
+
+.MessageList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.Message {
+  display: flex;
+}
+
+.Message--outgoing {
+  justify-content: flex-end;
+}
+
+.Message--incoming {
+  justify-content: flex-start;
+}
+
+.MessageBubble {
+  max-width: 70%;
+  padding: 0.4rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  line-height: 1.35;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.Message--outgoing .MessageBubble {
+  background: linear-gradient(135deg, #4f46e5, #6366f1);
+}
+
+@media (max-width: 800px) {
+  .AppLoggedIn {
+    max-width: 100%;
+  }
+}
