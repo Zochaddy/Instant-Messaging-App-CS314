@@ -259,10 +259,119 @@
   overflow-y: auto;
 }
 
+.ChatWelcome {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  padding: 2rem;
+  text-align: center;
+}
+
+.ChatWelcomeIcon {
+  font-size: 3rem;
+  margin-bottom: 0.75rem;
+  opacity: 0.8;
+}
+
+.ChatWelcomeTitle {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.95);
+}
+
 .ChatPlaceholder {
   margin: 0;
   opacity: 0.6;
   font-size: 0.95rem;
+}
+
+.ChatPlaceholder--loading {
+  font-style: italic;
+}
+
+.ConnectionBanner {
+  flex-shrink: 0;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.ConnectionBanner--error {
+  background: rgba(220, 80, 80, 0.25);
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.Toast {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: 90%;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  z-index: 1100;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.Toast--error {
+  background: rgba(40, 15, 15, 0.95);
+  border: 1px solid rgba(220, 80, 80, 0.5);
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.ToastDismiss {
+  flex-shrink: 0;
+  padding: 0.2rem 0.4rem;
+  background: transparent;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  font-size: 1rem;
+  opacity: 0.8;
+}
+
+.ToastDismiss:hover {
+  opacity: 1;
+}
+
+.ChatError {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+}
+
+.ChatErrorText {
+  margin: 0;
+  color: #ff6b6b;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.SidebarError {
+  padding: 0.75rem;
+  margin-bottom: 0.75rem;
+  border-radius: 10px;
+  background: rgba(220, 80, 80, 0.15);
+  border: 1px solid rgba(220, 80, 80, 0.3);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.SidebarErrorText {
+  margin: 0;
+  color: #ff6b6b;
+  font-size: 0.85rem;
 }
 
 .ChatInputBar {
@@ -498,6 +607,12 @@
   font-size: 1.4rem;
   font-weight: 700;
   color: rgba(255, 255, 255, 0.95);
+}
+
+.NewChatHint {
+  margin: 0 0 1rem 0;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.7);
 }
 
 .ProfileForm {

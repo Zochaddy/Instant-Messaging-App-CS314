@@ -65,7 +65,7 @@ function App() {
   const [isCheckingSession, setIsCheckingSession] = useState(true)
   const [user, setUser] = useState(null)
   const [socket, setSocket] = useState(null)
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true)
   const [chats, setChats] = useState([])
   const [selectedChatId, setSelectedChatId] = useState(null)
   const [messagesByChat, setMessagesByChat] = useState({})
@@ -75,6 +75,32 @@ function App() {
   const [profileLastName, setProfileLastName] = useState('')
   const [profileError, setProfileError] = useState('')
   const [profileSaving, setProfileSaving] = useState(false)
+  const [connectionStatus, setConnectionStatus] = useState(null) // 'connected' | 'disconnected' | 'error'
+  const [toastError, setToastError] = useState('')
+  const [createChatLoading, setCreateChatLoading] = useState(false)
+  const [createChatError, setCreateChatError] = useState('')
+  const [messagesLoading, setMessagesLoading] = useState(false)
+  const [messagesError, setMessagesError] = useState('')
+  const [isNewChatOpen, setIsNewChatOpen] = useState(false)
+  const [newChatSearchTerm, setNewChatSearchTerm] = useState('')
+
+  function getUserFriendlyError(err) {
+    if (!err) return 'Something went wrong.'
+    if (err instanceof Error) {
+      if (err.message === 'Failed to fetch' || err.message.includes('NetworkError')) {
+        return 'Connection problem. Please check your network and try again.'
+      }
+      return err.message
+    }
+    return String(err)
+  }
+
+  // Auto-dismiss toast after 5 seconds
+  useEffect(() => {
+    if (!toastError) return
+    const t = setTimeout(() => setToastError(''), 5000)
+    return () => clearTimeout(t)
+  }, [toastError])
 
   // On page load, ask backend if we already have a valid session.
   useEffect(() => {
@@ -233,6 +259,10 @@ function App() {
       return ''
     }
 
+    socketInstance.on('connect', () => setConnectionStatus('connected'))
+    socketInstance.on('disconnect', () => setConnectionStatus('disconnected'))
+    socketInstance.on('connect_error', () => setConnectionStatus('error'))
+
     socketInstance.on('receiveMessage', (message) => {
       const senderId = getUserId(message.sender)
       const recipientId = getUserId(message.recipient)
@@ -354,6 +384,8 @@ function App() {
 
   async function loadMessagesForContact(contactId) {
     if (!contactId || !user || !user.id) return
+    setMessagesLoading(true)
+    setMessagesError('')
     try {
       const result = await api('/api/messages/get-messages', {
         method: 'POST',
@@ -391,17 +423,31 @@ function App() {
         }),
       }))
     } catch (err) {
-      // For now, just log; UI still works without history.
-      console.error('Failed to load messages', err)
+      setMessagesError(getUserFriendlyError(err))
+    } finally {
+      setMessagesLoading(false)
     }
   }
 
-  async function handleCreateChat() {
-    const input = window.prompt('Enter the email (or name) of the person you want to chat with')
-    if (!input) return
-    const searchTerm = input.trim()
+  function openNewChatModal() {
+    setIsNewChatOpen(true)
+    setNewChatSearchTerm('')
+    setCreateChatError('')
+  }
+
+  function closeNewChatModal() {
+    setIsNewChatOpen(false)
+    setNewChatSearchTerm('')
+    setCreateChatError('')
+  }
+
+  async function handleSearchAndCreateChat(e) {
+    e?.preventDefault()
+    const searchTerm = newChatSearchTerm.trim()
     if (!searchTerm) return
 
+    setCreateChatLoading(true)
+    setCreateChatError('')
     try {
       const result = await api('/api/contacts/search', {
         method: 'POST',
@@ -414,14 +460,14 @@ function App() {
           : []
 
       if (foundContacts.length === 0) {
-        window.alert('No user found with that email or name.')
+        setCreateChatError('No user found with that email or name.')
         return
       }
 
       const contact = foundContacts[0]
       const contactId = contact && (contact._id || contact.id)
       if (!contactId) {
-        window.alert('Selected contact is missing an id.')
+        setCreateChatError('Selected contact is missing an id.')
         return
       }
 
@@ -438,14 +484,19 @@ function App() {
       })
 
       setSelectedChatId(contactId)
+      setCreateChatError('')
+      closeNewChatModal()
       await loadMessagesForContact(contactId)
     } catch (err) {
-      window.alert(err instanceof Error ? err.message : 'Failed to search for that contact.')
+      setCreateChatError(getUserFriendlyError(err))
+    } finally {
+      setCreateChatLoading(false)
     }
   }
 
   async function handleSelectChat(id) {
     setSelectedChatId(id)
+    setMessagesError('')
     if (!messagesByChat[id] || messagesByChat[id].length === 0) {
       await loadMessagesForContact(id)
     }
@@ -465,7 +516,7 @@ function App() {
         setSelectedChatId(null)
       }
     } catch (err) {
-      window.alert(err instanceof Error ? err.message : 'Failed to delete chat.')
+      setToastError(getUserFriendlyError(err) || 'Failed to delete chat.')
     }
   }
 
@@ -671,6 +722,28 @@ function App() {
 
   return (
     <div className="App AppLoggedIn">
+      {connectionStatus && connectionStatus !== 'connected' && (
+        <div className="ConnectionBanner ConnectionBanner--error">
+          {connectionStatus === 'disconnected'
+            ? 'Connection lost. Reconnecting…'
+            : 'Connection problem. Please check your network.'}
+        </div>
+      )}
+
+      {toastError && (
+        <div className="Toast Toast--error">
+          {toastError}
+          <button
+            type="button"
+            className="ToastDismiss"
+            onClick={() => setToastError('')}
+            aria-label="Dismiss"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
       <div className={`ChatLayout ${isSidebarOpen ? 'ChatLayout--sidebarOpen' : ''}`}>
         <header className="ChatHeader">
           <button
@@ -704,7 +777,26 @@ function App() {
         <main className="ChatMain">
           <div className="ChatMessages">
             {!selectedChatId ? (
-              <p className="ChatPlaceholder">Select a chat or create a new one.</p>
+              <div className="ChatWelcome">
+                <div className="ChatWelcomeIcon">💬</div>
+                <h3 className="ChatWelcomeTitle">Welcome to your inbox</h3>
+                <p className="ChatPlaceholder">
+                  Select a conversation from the sidebar or start a new chat to get started.
+                </p>
+              </div>
+            ) : messagesLoading ? (
+              <p className="ChatPlaceholder ChatPlaceholder--loading">Loading messages…</p>
+            ) : messagesError ? (
+              <div className="ChatError">
+                <p className="ChatErrorText">{messagesError}</p>
+                <button
+                  type="button"
+                  className="Button Secondary"
+                  onClick={() => loadMessagesForContact(selectedChatId)}
+                >
+                  Retry
+                </button>
+              </div>
             ) : (messagesByChat[selectedChatId] || []).length === 0 ? (
               <p className="ChatPlaceholder">No messages yet. Say hi!</p>
             ) : (
@@ -774,7 +866,7 @@ function App() {
                   <button
                     type="button"
                     className="Button NewChatButton"
-                    onClick={handleCreateChat}
+                    onClick={openNewChatModal}
                   >
                     New chat
                   </button>
@@ -820,7 +912,7 @@ function App() {
                   <button
                     type="button"
                     className="Button NewChatButton"
-                    onClick={handleCreateChat}
+                    onClick={openNewChatModal}
                   >
                     New chat
                   </button>
@@ -829,6 +921,44 @@ function App() {
             </div>
           </aside>
         )}
+
+      {isNewChatOpen && (
+        <div className="ProfileOverlay" onClick={closeNewChatModal}>
+          <div className="ProfileModal NewChatModal" onClick={(e) => e.stopPropagation()}>
+            <button
+              type="button"
+              className="ProfileModalClose"
+              onClick={closeNewChatModal}
+              aria-label="Close"
+            >
+              ✕
+            </button>
+            <h2 className="ProfileModalTitle">New chat</h2>
+            <p className="NewChatHint">Enter an email or name to search for someone to chat with.</p>
+            <form onSubmit={handleSearchAndCreateChat} className="ProfileForm">
+              <label className="Label">
+                Search
+                <input
+                  className="Input"
+                  type="text"
+                  placeholder="Email or name"
+                  value={newChatSearchTerm}
+                  onChange={(e) => setNewChatSearchTerm(e.target.value)}
+                  autoFocus
+                />
+              </label>
+              {createChatError ? <p className="Error">{createChatError}</p> : null}
+              <button
+                className="Button"
+                type="submit"
+                disabled={createChatLoading || !newChatSearchTerm.trim()}
+              >
+                {createChatLoading ? 'Searching…' : 'Search'}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
       </div>
 
       {isProfileOpen && (
