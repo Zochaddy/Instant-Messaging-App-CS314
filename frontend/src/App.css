@@ -154,6 +154,7 @@
   font-weight: 700;
   font-size: 0.9rem;
   color: rgba(0, 0, 0, 0.85);
+  overflow: hidden;
 }
 
 .AppBody {
@@ -342,7 +343,14 @@
   background: rgba(255, 255, 255, 0.08);
 }
 
+.ChatListItemRow {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
 .ChatListItemButton {
+  flex: 1;
   width: 100%;
   display: flex;
   align-items: center;
@@ -370,6 +378,27 @@
   font-size: 0.9rem;
 }
 
+.ChatListItemDelete {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ChatListItemDelete:hover {
+  background: rgba(255, 100, 100, 0.2);
+  color: rgba(255, 255, 255, 0.95);
+}
+
 .NewChatButton {
   width: 100%;
 }
@@ -385,14 +414,27 @@
 
 .Message {
   display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
 }
 
 .Message--outgoing {
-  justify-content: flex-end;
+  align-items: flex-end;
 }
 
 .Message--incoming {
-  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+.MessageSender {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.MessageTimestamp {
+  font-weight: 400;
+  opacity: 0.85;
 }
 
 .MessageBubble {
@@ -406,6 +448,87 @@
 
 .Message--outgoing .MessageBubble {
   background: linear-gradient(135deg, #4f46e5, #6366f1);
+}
+
+.ProfileOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.ProfileModal {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  padding: 1.5rem;
+  border-radius: 16px;
+  background: rgba(15, 15, 20, 0.98);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.5);
+}
+
+.ProfileModalClose {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ProfileModalClose:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.ProfileModalTitle {
+  margin: 0 0 1.25rem 0;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.ProfileForm {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.ProfilePhotoSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.ProfilePhotoWrapper {
+  width: 80px;
+  height: 80px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ProfilePhotoPlaceholder {
+  font-size: 2rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.95);
 }
 
 @media (max-width: 800px) {

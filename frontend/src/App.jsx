@@ -31,7 +31,32 @@ function App() {
     return data
   }
 
+  function getDisplayName(u) {
+    if (!u) return ''
+    const name = `${u.firstName || ''} ${u.lastName || ''}`.trim()
+    return name || u.email || u.username || u.name || ''
+  }
+
+  function formatMessageTime(ts) {
+    if (!ts) return ''
+    const d = typeof ts === 'string' ? new Date(ts) : new Date(Number(ts))
+    if (isNaN(d.getTime())) return ''
+    const now = new Date()
+    const isToday = d.toDateString() === now.toDateString()
+    if (isToday) {
+      return d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
+    }
+    const yesterday = new Date(now)
+    yesterday.setDate(yesterday.getDate() - 1)
+    if (d.toDateString() === yesterday.toDateString()) {
+      return `Yesterday ${d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}`
+    }
+    return d.toLocaleDateString([], { month: 'short', day: 'numeric' }) + ' ' + d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
+  }
+
   const [email, setEmail] = useState('')
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [authMode, setAuthMode] = useState('login') // 'login' | 'signup'
@@ -45,6 +70,11 @@ function App() {
   const [selectedChatId, setSelectedChatId] = useState(null)
   const [messagesByChat, setMessagesByChat] = useState({})
   const [draftMessage, setDraftMessage] = useState('')
+  const [isProfileOpen, setIsProfileOpen] = useState(false)
+  const [profileFirstName, setProfileFirstName] = useState('')
+  const [profileLastName, setProfileLastName] = useState('')
+  const [profileError, setProfileError] = useState('')
+  const [profileSaving, setProfileSaving] = useState(false)
 
   // On page load, ask backend if we already have a valid session.
   useEffect(() => {
@@ -128,17 +158,25 @@ function App() {
       return
     }
 
+    if (!firstName.trim() || !lastName.trim()) {
+      setError('Please enter your first and last name.')
+      return
+    }
+
     if (password !== confirmPassword) {
       setError('Passwords do not match.')
       return
     }
 
     try {
-      // Most backends accept { email, password }. If yours needs extra fields,
-      // the error message will tell us what to add.
       await api('/api/auth/signup', {
         method: 'POST',
-        body: JSON.stringify({ email: email.trim(), password }),
+        body: JSON.stringify({
+          email: email.trim(),
+          password,
+          firstName: firstName.trim(),
+          lastName: lastName.trim(),
+        }),
       })
 
       // Common behavior: signup either creates an account only OR also logs you in.
@@ -165,6 +203,8 @@ function App() {
         setAuthMode('login')
         setPassword('')
         setConfirmPassword('')
+        setFirstName('')
+        setLastName('')
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Signup failed')
@@ -202,11 +242,19 @@ function App() {
       const fromMe = senderId === myId
       const otherId = fromMe ? recipientId : senderId
 
+      const senderObj = message.sender && typeof message.sender === 'object' ? message.sender : null
+      const senderName = fromMe
+        ? getDisplayName(user) || 'You'
+        : senderObj
+          ? getDisplayName(senderObj) || 'Unknown'
+          : 'Unknown'
+
       const mapped = {
         id: message.id || message._id || String(Date.now() + Math.random()),
         sender: fromMe ? 'me' : 'them',
+        senderName,
         text: message.content,
-        timestamp: message.timestamp,
+        timestamp: message.timestamp || new Date().toISOString(),
       }
 
       setMessagesByChat((prev) => ({
@@ -289,6 +337,8 @@ function App() {
       setIsLoggedIn(false)
       setPassword('')
       setEmail('')
+      setFirstName('')
+      setLastName('')
       setUser(null)
       setChats([])
       setMessagesByChat({})
@@ -318,16 +368,23 @@ function App() {
       setMessagesByChat((prev) => ({
         ...prev,
         [contactId]: messages.map((m) => {
+          const senderObj = m.sender && typeof m.sender === 'object' ? m.sender : null
           const senderId =
             typeof m.sender === 'string'
               ? m.sender
-              : m.sender && typeof m.sender === 'object'
-                ? m.sender.id || m.sender._id
+              : senderObj
+                ? senderObj.id || senderObj._id
                 : ''
           const fromMe = senderId && user && senderId === user.id
+          const senderName = fromMe
+            ? getDisplayName(user) || 'You'
+            : senderObj
+              ? getDisplayName(senderObj) || 'Unknown'
+              : 'Unknown'
           return {
             id: m._id || m.id || String(Date.now() + Math.random()),
             sender: fromMe ? 'me' : 'them',
+            senderName,
             text: m.content,
             timestamp: m.timestamp,
           }
@@ -394,6 +451,24 @@ function App() {
     }
   }
 
+  async function handleDeleteChat(dmId) {
+    if (!dmId) return
+    try {
+      await api(`/api/contacts/delete-dm/${dmId}`, { method: 'DELETE' })
+      setChats((prev) => prev.filter((c) => c.id !== dmId))
+      setMessagesByChat((prev) => {
+        const next = { ...prev }
+        delete next[dmId]
+        return next
+      })
+      if (selectedChatId === dmId) {
+        setSelectedChatId(null)
+      }
+    } catch (err) {
+      window.alert(err instanceof Error ? err.message : 'Failed to delete chat.')
+    }
+  }
+
   function handleSendMessage(e) {
     e.preventDefault()
     if (!selectedChatId || !draftMessage.trim() || !user) return
@@ -402,6 +477,7 @@ function App() {
     const message = {
       id: String(Date.now() + Math.random()),
       sender: 'me',
+      senderName: getDisplayName(user) || 'You',
       text,
       timestamp: new Date().toISOString(),
     }
@@ -419,6 +495,55 @@ function App() {
         content: text,
         messageType: 'text',
       })
+    }
+  }
+
+  function openProfile() {
+    setProfileFirstName(user?.firstName ?? '')
+    setProfileLastName(user?.lastName ?? '')
+    setProfileError('')
+    setIsProfileOpen(true)
+  }
+
+  function closeProfile() {
+    setIsProfileOpen(false)
+    setProfileError('')
+  }
+
+  async function handleSaveProfile(e) {
+    e.preventDefault()
+    setProfileError('')
+    setProfileSaving(true)
+
+    const newFirstName = profileFirstName.trim()
+    const newLastName = profileLastName.trim()
+
+    if (!newFirstName || !newLastName) {
+      setProfileError('First and last name are required.')
+      setProfileSaving(false)
+      return
+    }
+
+    try {
+      const result = await api('/api/auth/update-profile', {
+        method: 'POST',
+        body: JSON.stringify({ firstName: newFirstName, lastName: newLastName }),
+      })
+
+      const updated = result?.user ?? result
+      if (updated && typeof updated === 'object') {
+        setUser(updated)
+        setEmail(getDisplayName(updated) || updated.email || '')
+      } else {
+        setUser((prev) => (prev ? { ...prev, firstName: newFirstName, lastName: newLastName } : null))
+        setEmail(`${newFirstName} ${newLastName}`)
+      }
+
+      closeProfile()
+    } catch (err) {
+      setProfileError(err instanceof Error ? err.message : 'Failed to update profile.')
+    } finally {
+      setProfileSaving(false)
     }
   }
 
@@ -447,6 +572,8 @@ function App() {
                   setError('')
                   setPassword('')
                   setConfirmPassword('')
+                  setFirstName('')
+                  setLastName('')
                   setAuthMode('login')
                 }}
               >
@@ -468,6 +595,33 @@ function App() {
             </div>
 
             <form onSubmit={authMode === 'login' ? handleLogin : handleSignup} className="Form">
+              {authMode === 'signup' ? (
+                <>
+                  <label className="Label">
+                    First name
+                    <input
+                      className="Input"
+                      type="text"
+                      value={firstName}
+                      onChange={(e) => setFirstName(e.target.value)}
+                      autoComplete="given-name"
+                      required
+                    />
+                  </label>
+                  <label className="Label">
+                    Last name
+                    <input
+                      className="Input"
+                      type="text"
+                      value={lastName}
+                      onChange={(e) => setLastName(e.target.value)}
+                      autoComplete="family-name"
+                      required
+                    />
+                  </label>
+                </>
+              ) : null}
+
               <label className="Label">
                 Email
                 <input
@@ -538,7 +692,7 @@ function App() {
               type="button"
               className="ProfileButton"
               aria-label="Open profile"
-              onClick={() => {}}
+              onClick={openProfile}
             >
               <span className="ProfileAvatar">
                 {email ? String(email).charAt(0).toUpperCase() : '?'}
@@ -564,6 +718,14 @@ function App() {
                         : 'Message Message--incoming'
                     }
                   >
+                    <span className="MessageSender">
+                      {message.senderName || (message.sender === 'me' ? 'You' : 'Unknown')}
+                      {message.timestamp ? (
+                        <span className="MessageTimestamp">
+                          {' · '}{formatMessageTime(message.timestamp)}
+                        </span>
+                      ) : null}
+                    </span>
                     <div className="MessageBubble">{message.text}</div>
                   </li>
                 ))}
@@ -629,16 +791,29 @@ function App() {
                             : 'ChatListItem'
                         }
                       >
-                        <button
-                          type="button"
-                          className="ChatListItemButton"
-                          onClick={() => handleSelectChat(chat.id)}
-                        >
-                          <span className="ChatListItemAvatar">
-                            {chat.name.charAt(0).toUpperCase()}
-                          </span>
-                          <span className="ChatListItemName">{chat.name}</span>
-                        </button>
+                        <div className="ChatListItemRow">
+                          <button
+                            type="button"
+                            className="ChatListItemButton"
+                            onClick={() => handleSelectChat(chat.id)}
+                          >
+                            <span className="ChatListItemAvatar">
+                              {chat.name.charAt(0).toUpperCase()}
+                            </span>
+                            <span className="ChatListItemName">{chat.name}</span>
+                          </button>
+                          <button
+                            type="button"
+                            className="ChatListItemDelete"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleDeleteChat(chat.id)
+                            }}
+                            aria-label="Delete chat"
+                          >
+                            🗑
+                          </button>
+                        </div>
                       </li>
                     ))}
                   </ul>
@@ -655,6 +830,67 @@ function App() {
           </aside>
         )}
       </div>
+
+      {isProfileOpen && (
+        <div className="ProfileOverlay" onClick={closeProfile}>
+          <div className="ProfileModal" onClick={(e) => e.stopPropagation()}>
+            <button
+              type="button"
+              className="ProfileModalClose"
+              onClick={closeProfile}
+              aria-label="Close profile"
+            >
+              ✕
+            </button>
+
+            <h2 className="ProfileModalTitle">Profile</h2>
+
+            <form onSubmit={handleSaveProfile} className="ProfileForm">
+              <div className="ProfilePhotoSection">
+                <div className="ProfilePhotoWrapper">
+                  <span className="ProfilePhotoPlaceholder">
+                    {getDisplayName(user) || email
+                      ? String(getDisplayName(user) || email).charAt(0).toUpperCase()
+                      : '?'}
+                  </span>
+                </div>
+              </div>
+
+              <label className="Label">
+                First name
+                <input
+                  className="Input"
+                  type="text"
+                  value={profileFirstName}
+                  onChange={(e) => setProfileFirstName(e.target.value)}
+                  autoComplete="given-name"
+                />
+              </label>
+
+              <label className="Label">
+                Last name
+                <input
+                  className="Input"
+                  type="text"
+                  value={profileLastName}
+                  onChange={(e) => setProfileLastName(e.target.value)}
+                  autoComplete="family-name"
+                />
+              </label>
+
+              {profileError ? <p className="Error">{profileError}</p> : null}
+
+              <button
+                className="Button"
+                type="submit"
+                disabled={profileSaving}
+              >
+                {profileSaving ? 'Saving…' : 'Save'}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
