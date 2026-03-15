@@ -1,16 +1,76 @@
-# React + Vite
+# Instant Messaging App – Frontend (CS314)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React + Vite frontend for the CS314 Instant Messaging application.
 
-Currently, two official plugins are available:
+## Quick Start
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### 1. Install dependencies
 
-## React Compiler
+```bash
+cd frontend
+npm install
+```
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### 2. Run the app (development)
 
-## Expanding the ESLint configuration
+```bash
+npm run dev
+```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Then open your browser and go to the URL shown in the terminal (usually **http://localhost:5173**).
+
+### 3. Run tests
+
+```bash
+npm test
+```
+
+This runs Jest with coverage and prints a coverage table in the terminal.
+
+### 4. View coverage report in browser
+
+After running `npm test`, open the HTML report:
+
+**macOS:**
+```bash
+open coverage/lcov-report/index.html
+```
+
+**Windows:**
+```bash
+start coverage/lcov-report/index.html
+```
+
+Or open `frontend/coverage/lcov-report/index.html` in your browser.
+
+---
+
+## Available Scripts
+
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start development server (opens at http://localhost:5173) |
+| `npm test` | Run Jest tests with coverage |
+| `npm run test:watch` | Run tests in watch mode |
+| `npm run build` | Build for production |
+| `npm run preview` | Preview production build locally |
+| `npm run lint` | Run ESLint |
+
+---
+
+## Project Structure
+
+```
+frontend/
+├── src/
+│   ├── App.jsx       # Main app component
+│   ├── App.test.jsx  # Tests
+│   ├── App.css       # Styles
+│   ├── main.jsx      # Entry point
+│   ├── utils.js      # Helper functions
+│   ├── utils.test.js # Unit tests for utils
+│   └── setupTests.js # Jest setup
+├── public/
+├── coverage/         # Generated after npm test (gitignored)
+└── package.json
+```

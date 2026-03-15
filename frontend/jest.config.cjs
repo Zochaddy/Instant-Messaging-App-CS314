@@ -14,4 +14,12 @@ module.exports = {
     '!src/main.jsx',
     '!src/setupTests.js',
   ],
+  coverageThreshold: {
+    global: {
+      lines: 95,
+      statements: 90,
+      branches: 65,
+      functions: 90,
+    },
+  },
 }
